@@ -9,52 +9,24 @@ Write a program to move the disks from the first tower to the last using Stacks.
 """
 def hanoi(disks: int)-> int:
     """the classics, recursive solution
+    https://www.youtube.com/watch?v=8lhxIOAfDss
     """
+    class Tower():
+        def __init__(self, t=[], name='kim'): self.tower=t; self.name=name
     # set 3 towers
-    t_1, t_2, t_3 = [e for e in reversed(range(disks))], [], []
-    def move_next(main, tmp, target):
-        if not main: return
-        print(f'----------------------------------------------------MOVE')
-        print(f'status: main:{main}, tmp:{tmp}, target:{target}')
-        print(f'move next disk: {main[-1]} from: main -> target')
-        target.append(main.pop())
-        print(f'status: main:{main}, tmp:{tmp}, target:{target}')
-        # call spread
-        spread_left(tmp, main, target)
-        return
-    def spread_right(main, tmp, target):
-        if not main: return
-        print(f'--------------------------------------------------SPREAD(right)')
-        print(f'status: main:{main}, tmp:{tmp}, target:{target}')
-        print(f'move: {main[-1]} from: main -> tmp')
-        tmp.append(main.pop())
-        print(f'status: main:{main}, tmp:{tmp}, target:{target}')
-        print(f'move: {main[-1]} from: main -> target')
-        target.append(main.pop())
-        print(f'status: main:{main}, tmp:{tmp}, target:{target}')
-        print(f'move: {tmp[-1]} from: tmp -> target')
-        target.append(tmp.pop())
-        print(f'status: main:{main}, tmp:{tmp}, target:{target}')
-        # call next move
-        move_next(main, target, tmp)
-        return
-    def spread_left(main, tmp, target):
-        if not main: return
-        print(f'--------------------------------------------------SPREAD(left)')
-        print(f'status: main:{main}, tmp:{tmp}, target:{target}')
-        print(f'move: {main[-1]} from: main -> tmp')
-        tmp.append(main.pop())
-        print(f'status: main:{main}, tmp:{tmp}, target:{target}')
-        print(f'move: {main[-1]} from: main -> target')
-        target.append(main.pop())
-        print(f'status: main:{main}, tmp:{tmp}, target:{target}')
-        print(f'move: {tmp[-1]} from: tmp -> target')
-        target.append(tmp.pop())
-        print(f'status: main:{main}, tmp:{tmp}, target:{target}')
-        # call next move
-        move_next(tmp, target, main)
-        return
-    return spread_right(t_1, t_2, t_3)
+    t_1 = Tower([e for e in reversed(range(disks))], 'A')
+    t_2 = Tower([], 'B')
+    t_3 = Tower([], 'C')
+    def move(main, tmp, target):
+        print(f'move next disk: {main.tower[-1]} from: {main.name} -> {target.name}')
+        target.tower.append(main.tower.pop())
+        print(f'status: {main.name}:{main.tower}, {tmp.name}:{tmp.tower}, {target.name}:{target.tower}')
+    def r(n, main, tmp, target):
+        if n == 0: return
+        r(n-1, main, target, tmp)
+        move(main, tmp, target)
+        r(n-1, tmp, main, target)
+    return r(disks, t_1, t_2, t_3)
 
 # test
 test = 4

@@ -8,15 +8,16 @@ projects: a, b, c, d, e, f
 dependencies: (a, d), (f, b), (b, d), (f, a), (d, c)
 Output: f, e, a, b, d, c
 """
+from collections import Counter
 class Graph():
     """graph from edges
     """
     def __init__(self, nodes, edges=[]):
         self.nodes = set(nodes)
-        self.incoming = set()
+        self.in_degrees = Counter()
         self.edges = {}
         for node, neighbor in edges:
-            self.incoming.add(neighbor)
+            self.in_degrees[neighbor] += 1
             self.edges.setdefault(node, []).append(neighbor)
     def __repr__(self):
         return repr(self.edges)
@@ -26,20 +27,27 @@ class Graph():
 def build_order(graph: Graph)-> list:
     """get topological order, kahn's algorithm
     """
-    # find nodes with no incoming edges
-    sources = graph.nodes - graph.incoming
+    # find nodes with no incoming edges O(n)
+    sources = list(graph.nodes - set(graph.in_degrees.keys()))
     if not sources: raise ValueError('no valid build order')
-    # execute standard dfs to find topological order
-    res, visited = list(sources), set()
+    # execute modified dfs to find topological order
+    res = sources[:]
     def dfs(node):
-        visited.add(node)
         for neighbor in graph.neighbors(node):
-            if neighbor not in visited: dfs(neighbor); res.append(neighbor)
-    for source in sources: dfs(source)
+            graph.in_degrees[neighbor] -= 1
+            print(f'current_node: {node}, neighbor: {neighbor}, sources: {sources}, counter: {graph.in_degrees}')
+            # when the in_degree counter reaches 0 add node to the remaining sources and res
+            if graph.in_degrees[neighbor] == 0:
+                del(graph.in_degrees[neighbor])
+                res.append(neighbor)
+                sources.append(neighbor)
+    # iterate kahn's algorithm in the remaining sources
+    while sources:
+        dfs(sources.pop())
     return res
 
 # test
 nodes = ['a', 'b', 'c', 'd', 'e', 'f']
 edges = [('a', 'd'), ('f', 'b'), ('b', 'd'), ('f', 'a'), ('d', 'c')]
 test = Graph(nodes, edges)
-print(f'test: {edges}, graph: {test}, build_order: {build_order(test)}')
+print(f'test: {test}, build_order: {build_order(test)}')
